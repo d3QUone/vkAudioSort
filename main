@@ -1,0 +1,59 @@
+# -*- coding: cp1251 -*-
+import urllib
+import json
+from datetime import datetime
+
+def main():
+    token = 'your_token_here'
+    oid = 'your_vk_id_here'
+    
+    t = datetime.now()
+    glob = 0
+
+    response = urllib.urlopen('https://api.vk.com/method/audio.getCount?oid=' + oid + '&access_token=' + token)
+    response = json.load(response)
+    count = response['response']
+
+    output = []
+    offset = 0
+    number = 100
+    steps = count / number + 1
+    for i in range(0, steps):
+        if count > number:
+            count -= number
+        else:
+            number = count
+
+        response = urllib.urlopen('https://api.vk.com/method/audio.get?uid=' + oid + \
+                                  '&count=' + str(number) + \
+                                  '&offset=' + str(offset) + \
+                                  '&access_token=' + token)
+        response = json.load(response)
+        audios = response['response']
+
+        for j in audios:
+            output.append({'aid': j['aid'],
+                           'artist': j['artist'],
+                           'title': j['title']})
+        offset += number
+
+    aSorted = [[o['artist'], o['title'], o['aid']] for o in output]
+    aSorted.sort(reverse=True)
+
+    before = output[0]['aid']
+    for i in aSorted:
+        response = urllib.urlopen('https://api.vk.com/method/audio.reorder?aid=' + str(i[2]) + \
+                                  '&before=' + str(before) + \
+                                  '&access_token=' + token)
+                                  #after=0&before=' + str(before)
+        response = json.load(response)
+        before = i[2]
+        glob += 1
+
+    t = datetime.now() - t
+    stat = open('_stat.txt', 'w')
+    stat.write('worked= ' + str(t) + '\n\ntotal audios = ' + str(glob))
+    stat.close
+
+
+main()
