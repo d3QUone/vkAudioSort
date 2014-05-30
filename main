@@ -1,16 +1,16 @@
 # -*- coding: cp1251 -*-
 import urllib
 import json
+import time
 from datetime import datetime
 
+
 def main():
-    token = 'your_token_here'
-    oid = 'your_vk_id_here'
-    
+    token = '26ecc39cc4ef6fae47639c6bf6aa2414245e726835bee4869d18a14e3396677360b6747c382b82491a30e'
     t = datetime.now()
     glob = 0
 
-    response = urllib.urlopen('https://api.vk.com/method/audio.getCount?oid=' + oid + '&access_token=' + token)
+    response = urllib.urlopen('https://api.vk.com/method/audio.getCount?oid=51758590&access_token=' + token)
     response = json.load(response)
     count = response['response']
 
@@ -24,7 +24,7 @@ def main():
         else:
             number = count
 
-        response = urllib.urlopen('https://api.vk.com/method/audio.get?uid=' + oid + \
+        response = urllib.urlopen('https://api.vk.com/method/audio.get?uid=51758590' + \
                                   '&count=' + str(number) + \
                                   '&offset=' + str(offset) + \
                                   '&access_token=' + token)
@@ -33,12 +33,14 @@ def main():
 
         for j in audios:
             output.append({'aid': j['aid'],
-                           'artist': j['artist'],
-                           'title': j['title']})
+                           'artist': j['artist'].lower().replace('the', ''),
+                           'title': j['title'].lower().replace('the', '')})
         offset += number
 
     aSorted = [[o['artist'], o['title'], o['aid']] for o in output]
     aSorted.sort(reverse=True)
+
+    errorRequest = 0
 
     before = output[0]['aid']
     for i in aSorted:
@@ -47,12 +49,22 @@ def main():
                                   '&access_token=' + token)
                                   #after=0&before=' + str(before)
         response = json.load(response)
+        try:
+             get = response['response']
+             if get == 1:
+                 glob += 1
+        except:
+            errorRequest += 1
         before = i[2]
-        glob += 1
+
+        time.sleep(0.3)
+
+    print 'successful ' + str(glob) + '\nerrors ' + str(errorRequest)
+
 
     t = datetime.now() - t
     stat = open('_stat.txt', 'w')
-    stat.write('worked= ' + str(t) + '\n\ntotal audios = ' + str(glob))
+    stat.write('worked= ' + str(t) + '\n\nsuccess audios ' + str(glob) + '\nerrors ' + str(errorRequest))
     stat.close
 
 
