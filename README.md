@@ -1,9 +1,10 @@
 vkAudioSort
+===========
 
 Сортировка аудиозаписей ВКонтакте в алфавитном порядке по исполнителю или названию.
 
 VKontakte audio sorting in alphabetic order by artist or title.
-===========
+<hr></hr>
 
 Перед началом работы нужно получить token - ключ для доступа к API.
 
