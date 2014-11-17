@@ -6,6 +6,7 @@ from datetime import datetime
 
 
 def main():
+    # paste your token below:
     token = '26ecc39cc4ef6fae47639c6bf6aa2414245e726835bee4869d18a14e3396677360b6747c382b82491a30e'
     t = datetime.now()
     glob = 0
