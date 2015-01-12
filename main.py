@@ -15,10 +15,12 @@ def main():
     response = json.load(response)
     count = response['response']
 
-    output = []
     offset = 0
     number = 100
     steps = count / number + 1
+    
+    output = []
+    append = output.append
     for i in range(0, steps):
         if count > number:
             count -= number
@@ -26,25 +28,20 @@ def main():
             number = count
 
         response = urllib.urlopen('https://api.vk.com/method/audio.get?uid=51758590' + \
-                                  '&count=' + str(number) + \
-                                  '&offset=' + str(offset) + \
-                                  '&access_token=' + token)
+                                  '&count={0}&offset={1}&access_token={2}'.format(number, offset, token))
         response = json.load(response)
         audios = response['response']
 
         for j in audios:
-            output.append({'aid': j['aid'],
-                           'artist': j['artist'].lower().replace('the', ''),
-                           'title': j['title'].lower().replace('the', '')})
+            append([j['artist'].lower().replace('the', ''), j['title'].lower().replace('the', ''), j['aid']])
+            
         offset += number
-
-    aSorted = [[o['artist'], o['title'], o['aid']] for o in output]
-    aSorted.sort(reverse=True)
+    
+    before = output[0][3] # 'aid'
+    output.sort(reverse=True)
 
     errorRequest = 0
-
-    before = output[0]['aid']
-    for i in aSorted:
+    for i in output:
         response = urllib.urlopen('https://api.vk.com/method/audio.reorder?aid=' + str(i[2]) + \
                                   '&before=' + str(before) + \
                                   '&access_token=' + token)
@@ -60,13 +57,11 @@ def main():
 
         time.sleep(0.3)
 
-    print 'successful ' + str(glob) + '\nerrors ' + str(errorRequest)
-
+    print 'successful {0}\nerrors {1}'.format(glob, errorRequest)
 
     t = datetime.now() - t
     stat = open('_stat.txt', 'w')
-    stat.write('worked= ' + str(t) + '\n\nsuccess audios ' + str(glob) + '\nerrors ' + str(errorRequest))
-    stat.close
-
+    stat.write('worked= {0}\n\nsuccess audios {1}\nerrors {2}'.format(t, glob, errorRequest))
+    stat.close()
 
 main()
